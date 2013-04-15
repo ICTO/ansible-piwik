@@ -1,0 +1,32 @@
+---
+# Install MySQL server
+- name: "Install MySQL server"
+  action: ${ansible_pkg_mgr} pkg=mysql-server state=installed update-cache=yes
+  register: mysql_server
+  tags:
+    - database
+
+- name: "Change MySQL root password"
+  action: shell mysqladmin -h ${mysql.host} -u ${mysql.admin_user} password ${mysql.admin_password}
+  when_changed: ${mysql_server}
+  tags:
+    - database
+
+# Install MySQLdb Python package, mandatory to manage MySQL with ansible
+- name: "Install MySQLdb python package"
+  action: ${ansible_pkg_mgr} pkg=python-mysqldb state=installed update-cache=yes
+  tags:
+    - database
+
+# Manage Piwik database
+- name: "Manage Piwik db"
+  action: mysql_db encoding=utf8 name=${piwik.db.name} state=present login_user=${mysql.admin_user} login_password=${mysql.admin_password} login_host=${mysql.host}
+  register: create_db
+  tags:
+    - database
+
+# Manage Piwik database user
+- name: "Manage Piwik db-user"
+  action: mysql_user name=${piwik.db.user} password=${piwik.db.pass} priv=${piwik.db.name}.*:ALL state=present login_user=${mysql.admin_user} login_password=${mysql.admin_password} login_host=${mysql.host}
+  tags:
+    - database

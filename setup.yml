@@ -1,0 +1,15 @@
+---
+- name: "Piwik playbook"
+  hosts: piwik
+  user: $user
+  sudo: yes
+  sudo_user: root
+
+  vars_files:
+    - vars/piwik.yml
+
+  tasks:
+    - include: tasks/setup.yml
+
+  handlers:
+    - include: handlers/apache.yml

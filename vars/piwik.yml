@@ -1,0 +1,24 @@
+---
+piwik:
+  zip: 'http://builds.piwik.org/latest.zip'
+  www_user: 'www-data'
+  www_group: 'www-data'
+  dependencies: 
+    - 'apache2'
+    - 'php5'
+    - 'libapache2-mod-php5'
+    - 'php5-mysql'
+    - 'php5-gd'
+    - 'unzip'
+  db:
+    name: 'piwik'
+    user: 'piwik'
+    pass: 'piwik'
+  tmp_dir: '/tmp'
+  install_dir: '/opt/piwik'
+  dest_dir: '/opt/piwik/piwik'
+  dirs:
+    - 'tmp'
+    - 'tmp/templates_c'
+    - 'tmp/assets'
+    - 'tmp/tcpdf'

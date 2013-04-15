@@ -1,0 +1,42 @@
+---
+# Install Piwik dependencies
+- name: "Install Piwik dependencies"
+  action: ${ansible_pkg_mgr} pkg=${item} state=installed update-cache=yes
+  with_items: ${piwik.dependencies}
+  tags:
+    - piwik
+
+# Fetch latest release
+- name: "Fetch latest Piwik release"
+  action: get_url url=${piwik.zip} dest=${piwik.tmp_dir} mode=0440 owner=root group=root
+  register: piwik_release
+  tags:
+    - piwik
+
+# Create Piwik destination folder
+- name: "Create Piwik destination folder"
+  action: file path=${piwik.install_dir} owner=${piwik.www_user} group=${piwik.www_group} mode=0755 state=directory
+  tags:
+    - piwik
+
+# Extract package
+- name: "Extract Piwik zipfile"
+  action: shell unzip -u ${piwik.tmp_dir}/latest.zip -d ${piwik.install_dir}
+  when_changed: ${piwik_release}
+  tags:
+    - piwik
+
+# Create Piwik temp folders
+- name: "Create Piwik temp folders"
+  action: file path=${piwik.dest_dir}/${item} owner=${piwik.www_user} group=${piwik.www_group} mode=0755 state=directory
+  with_items: ${piwik.dirs}
+  tags:
+    - piwik
+
+# Add Piwik Apache alias
+- name: "Add Piwik apache Alias"
+  action: template src=templates/piwik.j2 dest=/etc/apache2/conf.d/piwik owner=${piwik.www_user} group=${piwik.www_group} mode=0640
+  notify:
+    - "Restart Apache"
+  tags:
+    - piwik

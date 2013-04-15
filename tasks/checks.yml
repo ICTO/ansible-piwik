@@ -1,0 +1,7 @@
+---
+- name: "Fail if no zabbix server ip defined"
+  fail: msg="Zabbix server IP undefined in host_vars or group_vars for host"
+  when_unset: ${with_zabbix_server_ip}
+  tags:
+    - zabbix
+    - checks
