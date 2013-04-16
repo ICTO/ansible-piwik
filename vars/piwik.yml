@@ -24,5 +24,4 @@ piwik:
     - 'tmp/assets'
     - 'tmp/tcpdf'
     - 'config'
-
-sites: ${piwik_sites}
+  sites: ${piwik_sites}

@@ -8,7 +8,7 @@
 
 - name: "Fail if no sites defined"
   fail: msg="Define at least 1 site"
-  when_unset: ${sites}
+  when_unset: ${piwik.sites}
   tags:
     - piwik
     - checks

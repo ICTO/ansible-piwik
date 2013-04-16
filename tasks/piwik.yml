@@ -55,12 +55,15 @@
 
 # Generate admin API token to use in API requests later on
 - name: "Generate API auth token"
-  action: shell echo -n "${piwik_settings.superuser}${piwik_settings.password}" | md5sum | cut -f 1 -d ' '
+  action: shell echo -n ${piwik_settings.superuser}${piwik_settings.password} | md5sum | cut -f 1 -d ' '
   register: auth_token
   tags:
     - piwik
 
-# Add sites to Piwik
-- include: tasks/piwik_site.yml sitename=${item.name} url=${item.url} token=${auth_token.stdout}
-  when_set: ${item.name}
-  with_items: ${sites}
+
+- name: "Check if site is present"
+  action: shell bash -c "[ `curl 'http://127.0.0.1/piwik/index.php?module=API&method=SitesManager.getSitesIdFromSiteUrl&url=http://${item.url}&format=JSON&token_auth=${auth_token.stdout}'` == '[]' ] && curl 'http://127.0.0.1/piwik/index.php?module=API&method=SitesManager.addSite&siteName=${item.name}&urls=${item.url}&format=json&token_auth=${auth_token.stdout}'"
+  ignore_errors: yes
+  with_items: ${piwik.sites}
+  tags:
+    - piwik
