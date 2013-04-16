@@ -1,0 +1,12 @@
+---
+- name: "Check if site is present"
+  action: shell curl "http://127.0.0.1/piwik/index.php?module=API&method=SitesManager.getSitesIdFromSiteUrl&url=http://${url}&format=JSON&token_auth=${token}"
+  register: site_id
+  tags:
+    - piwik
+
+- name: "Add sites"
+  action: shell curl "http://127.0.0.1/piwik/index.php?module=API&method=SitesManager.addSite&siteName=${sitename}&urls=${url}&format=json&token_auth=${token}"
+  when_string: ${site_id.stdout} == "[]"
+  tags:
+    - piwik

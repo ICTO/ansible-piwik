@@ -30,3 +30,16 @@
   action: mysql_user name=${piwik.db.user} password=${piwik.db.pass} priv=${piwik.db.name}.*:ALL state=present login_user=${mysql.admin_user} login_password=${mysql.admin_password} login_host=${mysql.host}
   tags:
     - database
+
+# Transfer SQL file
+- name: "Transfer SQL file"
+  action: copy src=files/piwik.sql dest=${piwik.tmp_dir}/piwik.sql owner=root group=root mode=0640
+  tags:
+    - database
+
+# Execute db installation scripts
+- name: "Execute Piwik SQL files"
+  action: shell cat ${piwik.tmp_dir}/piwik.sql | mysql -u${piwik.db.user} -p${piwik.db.pass} ${piwik.db.name}
+  when_boolean: ${create_db.changed}
+  tags:
+    - database

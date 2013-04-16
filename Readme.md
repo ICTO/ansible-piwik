@@ -63,12 +63,25 @@ $ vi piwik
 
 with
 
-```
+```yaml
 ---
 mysql:
   admin_user: root
   admin_password: NEW
   host: 127.0.0.1
+
+piwik_settings:
+  contact: 'your@email.com'
+  trustedhost: 'ip running piwik'
+  superuser: 'admin'
+  password: 'md5sum of password'
+  salt: '991c3720d8762830ddeeea1201aaa22a'
+
+piwik_sites:
+  - name: 'example1'
+    url: 'www.example1.com'
+  - name: 'example2'
+    url: 'www.example2.com'
 ```
 
 ### Run the playbook

@@ -14,6 +14,7 @@ piwik:
     name: 'piwik'
     user: 'piwik'
     pass: 'piwik'
+    host: '127.0.0.1'
   tmp_dir: '/tmp'
   install_dir: '/opt/piwik'
   dest_dir: '/opt/piwik/piwik'
@@ -22,3 +23,6 @@ piwik:
     - 'tmp/templates_c'
     - 'tmp/assets'
     - 'tmp/tcpdf'
+    - 'config'
+
+sites: ${piwik_sites}

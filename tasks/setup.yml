@@ -1,6 +1,6 @@
 ---
 # Execute some tests first
-#- include: tasks/checks.yml
+- include: tasks/checks.yml
 
 # Manage Piwik MySQL db
 - include: tasks/db.yml

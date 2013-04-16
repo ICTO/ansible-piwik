@@ -1,7 +1,14 @@
 ---
-- name: "Fail if no zabbix server ip defined"
-  fail: msg="Zabbix server IP undefined in host_vars or group_vars for host"
-  when_unset: ${with_zabbix_server_ip}
+- name: "Fail if no MySQL configuration"
+  fail: msg="MySQL settings not defined"
+  when_unset: ${mysql}
   tags:
-    - zabbix
+    - piwik
+    - checks
+
+- name: "Fail if no sites defined"
+  fail: msg="Define at least 1 site"
+  when_unset: ${sites}
+  tags:
+    - piwik
     - checks

@@ -33,10 +33,34 @@
   tags:
     - piwik
 
+# Add Piwik config
+- name: "Add Piwik config"
+  action: template src=templates/config.ini.php.j2 dest=${piwik.dest_dir}/config/config.ini.php owner=${piwik.www_user} group=${piwik.www_group} mode=0640
+  tags:
+    - piwik
+
 # Add Piwik Apache alias
 - name: "Add Piwik apache Alias"
   action: template src=templates/piwik.j2 dest=/etc/apache2/conf.d/piwik owner=${piwik.www_user} group=${piwik.www_group} mode=0640
-  notify:
-    - "Restart Apache"
+  register: apache_conf
   tags:
     - piwik
+
+# Restart Apache if config changed
+- name: "Restart Apache"
+  action: service name=apache2 state=restarted
+  when_changed: ${apache_conf}
+  tags:
+    - piwik
+
+# Generate admin API token to use in API requests later on
+- name: "Generate API auth token"
+  action: shell echo -n "${piwik_settings.superuser}${piwik_settings.password}" | md5sum | cut -f 1 -d ' '
+  register: auth_token
+  tags:
+    - piwik
+
+# Add sites to Piwik
+- include: tasks/piwik_site.yml sitename=${item.name} url=${item.url} token=${auth_token.stdout}
+  when_set: ${item.name}
+  with_items: ${sites}
