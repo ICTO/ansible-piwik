@@ -13,6 +13,3 @@
 
 # Install LDAP plugin
 - include: tasks/ldap.yml
-
-# Install SSL
-- include: tasks/ssl.yml

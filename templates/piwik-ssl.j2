@@ -1,7 +1,0 @@
-RewriteEngine On
-# This will enable the Rewrite capabilities
-
-RewriteCond %{HTTPS} !=on
-# This checks to make sure the connection is not already HTTPS
-
-RewriteRule ^/piwik/index.php(.*) https://%{SERVER_NAME}/piwik/index.php$1 [R,L]
