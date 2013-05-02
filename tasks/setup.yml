@@ -7,3 +7,12 @@
 
 # Install Piwik
 - include: tasks/piwik.yml
+
+# Install GeoIP database file
+- include: tasks/geoip.yml
+
+# Install LDAP plugin
+- include: tasks/ldap.yml
+
+# Install SSL
+- include: tasks/ssl.yml

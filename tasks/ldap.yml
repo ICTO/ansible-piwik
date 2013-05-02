@@ -1,0 +1,26 @@
+---
+# Fetch the ldap plugin
+- name: "Fetch LDAP plugin"
+  action: get_url url=${ldap.url} dest=${piwik.plugin_dir}/${ldap.dest_file} mode=0660 owner=${piwik.www_user} group=${piwik.www_group}
+  register: ldap_plugin
+  tags:
+    - piwik
+
+# Extract LDAP plugin
+- name: "Extract LDAP plugin"
+  action: shell unzip -f ${piwik.plugin_dir}/${ldap.dest_file} chdir="${piwik.plugin_dir}"
+  when_changed: ${ldap_plugin}
+  tags:
+    - piwik
+
+# Enable LDAP plugin
+- name: "Enable LDAP plugin"
+  action: lineinfile dest=${piwik.config} regexp="^PluginsInstalled" insertafter="^PluginsInstalled*Overlay" line="PluginsInstalled[] = \"LoginLdap\""
+  tags:
+    - piwik
+
+# Activate LDAP plugin
+- name: "Activate LDAP plugin"
+  action: lineinfile dest=${piwik.config} regexp="Plugins\[\] = \"Login*\"" line="Plugins[] = \"LoginLdap\""
+  tags:
+    - piwik

@@ -1,0 +1,33 @@
+---
+# Enable Apache SSL
+- name: "Enable Apache SSL module"
+  action: shell a2enmod ssl | grep 'Module ssl already enabled' | wc -l
+  when_boolean: ${with_ssl}
+  tags:
+    - piwik
+    - ssl
+
+# Enable Apache SSL
+- name: "Enable Apache SSL module"
+  action: shell a2enmod rewrite | grep 'Module rewrite already enabled' | wc -l
+  when_boolean: ${with_ssl}
+  tags:
+    - piwik
+    - ssl
+
+# Add Piwik-ssl config
+- name: "Add Piwik-ssl config"
+  action: template src=templates/piwik-ssl.j2 dest=/etc/apache2/conf.d/piwik-ssl owner=${piwik.www_user} group=${piwik.www_group} mode=0640
+  when_boolean: ${with_ssl}
+  register: apachessl_conf
+  tags:
+    - piwik
+    - ssl
+
+# Restart Apache if config changed
+- name: "Restart Apache"
+  action: service name=apache2 state=restarted
+  when_changed: ${apachessl_conf}
+  tags:
+    - piwik
+    - ssl

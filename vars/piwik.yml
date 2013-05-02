@@ -9,6 +9,8 @@ piwik:
     - 'libapache2-mod-php5'
     - 'php5-mysql'
     - 'php5-gd'
+    - 'php5-geoip'
+    - 'php5-ldap'
     - 'unzip'
   db:
     name: 'piwik'
@@ -18,6 +20,8 @@ piwik:
   tmp_dir: '/tmp'
   install_dir: '/opt/piwik'
   dest_dir: '/opt/piwik/piwik'
+  config: '/opt/piwik/piwik/config/config.ini.php'
+  plugin_dir: '/opt/piwik/piwik/plugins'
   dirs:
     - 'tmp'
     - 'tmp/templates_c'
@@ -25,3 +29,14 @@ piwik:
     - 'tmp/tcpdf'
     - 'config'
   sites: ${piwik_sites}
+
+geoip: 
+  url: 'http://geolite.maxmind.com/download/geoip/database/'
+  orig_file: 'GeoLiteCity.dat'
+  dest_file: 'GeoIPCity.dat'
+
+ldap:
+  url: 'http://piwik-ldap.googlecode.com/files/LoginLdap-1.3.1.zip'
+  dest_file: 'LoginLdap.zip'
+
+with_ssl: true
