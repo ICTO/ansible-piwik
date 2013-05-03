@@ -1,14 +1,14 @@
 ---
 # Fetch the ldap plugin
 - name: "Fetch LDAP plugin"
-  action: get_url url=${ldap.url} dest=${piwik.plugin_dir}/${ldap.dest_file} mode=0660 owner=${piwik.www_user} group=${piwik.www_group}
+  action: get_url url=${ldap.url} dest=${piwik.plugin_dir}/${ldap.dest_file} mode=0660
   register: ldap_plugin
   tags:
     - piwik
 
 # Extract LDAP plugin
 - name: "Extract LDAP plugin"
-  action: shell unzip -f ${piwik.plugin_dir}/${ldap.dest_file} chdir="${piwik.plugin_dir}"
+  action: shell unzip -o ${piwik.plugin_dir}/${ldap.dest_file} chdir="${piwik.plugin_dir}"
   when_changed: ${ldap_plugin}
   tags:
     - piwik
