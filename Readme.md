@@ -76,12 +76,20 @@ piwik_settings:
   superuser: 'admin'
   password: 'md5sum of password'
   salt: '991c3720d8762830ddeeea1201aaa22a'
+  ip_range: 'All'
 
 piwik_sites:
   - name: 'example1'
     url: 'www.example1.com'
   - name: 'example2'
     url: 'www.example2.com'
+
+ldap_settings:
+  server: 'ldaps://ldapserver'
+  basedn: 'base_dn'
+  user: 'user'
+  pass: 'pass'
+  filter: '(objectClass=person)'
 ```
 
 ### Run the playbook

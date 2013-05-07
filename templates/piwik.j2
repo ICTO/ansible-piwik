@@ -2,3 +2,14 @@
 <IfModule mod_alias.c>
     Alias /piwik {{ piwik.dest_dir }}
 </IfModule>
+
+<Directory {{ piwik.dest_dir }}>
+	Order Deny,Allow 
+	Deny from All 
+	Allow from {{ piwik_settings.ip_range }}
+ 
+	<Files "piwik.php"> 
+	     Order Deny,Allow 
+	     Allow from All 
+	</Files>
+</Directory>

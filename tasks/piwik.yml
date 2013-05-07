@@ -33,9 +33,15 @@
   tags:
     - piwik
 
+# Create Piwik fragments folder
+- name: "Create Piwik fragments folder"
+  action: file path=${piwik.dest_dir}/config/fragments owner=${piwik.www_user} group=${piwik.www_group} mode=0750 state=directory
+  tags:
+    - piwik
+
 # Add Piwik config
 - name: "Add Piwik config"
-  action: template src=templates/config.ini.php.j2 dest=${piwik.dest_dir}/config/config.ini.php owner=${piwik.www_user} group=${piwik.www_group} mode=0640
+  action: template src=templates/config.ini.php.j2 dest=${piwik.dest_dir}/config/fragments/base_config.ini.php owner=${piwik.www_user} group=${piwik.www_group} mode=0640
   tags:
     - piwik
 
@@ -50,20 +56,5 @@
 - name: "Restart Apache"
   action: service name=apache2 state=restarted
   when_changed: ${apache_conf}
-  tags:
-    - piwik
-
-# Generate admin API token to use in API requests later on
-- name: "Generate API auth token"
-  action: shell echo -n ${piwik_settings.superuser}${piwik_settings.password} | md5sum | cut -f 1 -d ' '
-  register: auth_token
-  tags:
-    - piwik
-
-
-- name: "Check if site is present"
-  action: shell bash -c "[ `curl 'http://127.0.0.1/piwik/index.php?module=API&method=SitesManager.getSitesIdFromSiteUrl&url=http://${item.url}&format=JSON&token_auth=${auth_token.stdout}'` == '[]' ] && curl 'http://127.0.0.1/piwik/index.php?module=API&method=SitesManager.addSite&siteName=${item.name}&urls=${item.url}&format=json&token_auth=${auth_token.stdout}'"
-  ignore_errors: yes
-  with_items: ${piwik.sites}
   tags:
     - piwik

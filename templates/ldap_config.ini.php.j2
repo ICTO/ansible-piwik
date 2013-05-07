@@ -1,0 +1,12 @@
+[LoginLdap]
+serverUrl = "{{ ldap_settings.server }}"
+baseDn = "{{ ldap_settings.basedn }}"
+userIdField = "uid"
+mailField = "mail"
+aliasField = "cn"
+usernameSuffix = ""
+adminUser = "{{ ldap_settings.user }}"
+adminPass = "{{ ldap_settings.pass }}"
+memberOf = ""
+filter = "{{ ldap_settings.filter }}"
+kerberos = 0
