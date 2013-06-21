@@ -1,38 +1,44 @@
 ---
 # Fetch the ldap plugin
 - name: "Fetch LDAP plugin"
-  action: get_url url=${ldap.url} dest=${piwik.plugin_dir}/${ldap.dest_file} owner=${piwik.www_user} group=${piwik.www_group} mode=0660
+  action: get_url url={{ ldap.url }}/{{ ldap.file }} dest={{ piwik.locations.plugins }}/{{ ldap.dest }} owner={{ apache.user }} group={{ apache.group }} mode=0660
   register: ldap_plugin
   tags:
+    - ldap
     - piwik
 
 # Extract LDAP plugin
 - name: "Extract LDAP plugin"
-  action: shell unzip -o ${piwik.plugin_dir}/${ldap.dest_file} chdir="${piwik.plugin_dir}"
-  when_changed: ${ldap_plugin}
+  action: shell unzip -o {{ piwik.locations.plugins }}/{{ ldap.dest }} chdir={{ piwik.locations.plugins }}
+  when: ldap_plugin.changed
   tags:
+    - ldap
     - piwik
 
 # Fix plugin dir permissions
 - name: "Fix LDAP plugin dir permissions"
-  file: path=${piwik.plugin_dir}/LoginLdap owner=${piwik.www_user} group=${piwik.www_group} state=directory recurse=yes
+  file: path={{ piwik.locations.plugins }}/{{ ldap.name }} owner={{ apache.user }} group={{ apache.group }} state=directory recurse=yes
   tags:
+    - ldap
     - piwik
 
 # Enable LDAP plugin
 - name: "Enable LDAP plugin"
-  action: lineinfile dest=${piwik.dest_dir}/config/fragments/base_config.ini.php regexp="^PluginsInstalled" insertafter="^PluginsInstalled*Overlay" line="PluginsInstalled[] = \"LoginLdap\""
+  action: lineinfile dest={{ piwik.locations.dest }}/config/fragments/base_config.ini.php regexp="^PluginsInstalled" insertafter="^PluginsInstalled*Overlay" line="PluginsInstalled[] = \"{{ ldap.name }}\""
   tags:
+    - ldap
     - piwik
 
 # Activate LDAP plugin
 - name: "Activate LDAP plugin"
-  action: lineinfile dest=${piwik.dest_dir}/config/fragments/base_config.ini.php regexp="Plugins\[\] = \"Login*\"" line="Plugins[] = \"LoginLdap\""
+  action: lineinfile dest={{ piwik.locations.dest }}/config/fragments/base_config.ini.php regexp="Plugins\[\] = \"Login*\"" line="Plugins[] = \"{{ ldap.name }}\""
   tags:
+    - ldap
     - piwik
 
 # Add Piwik ldap config
 - name: "Add Piwik ldap config"
-  action: template src=templates/ldap_config.ini.php.j2 dest=${piwik.dest_dir}/config/fragments/ldap_config.ini.php owner=${piwik.www_user} group=${piwik.www_group} mode=0640
+  action: template src=templates/ldap_config.ini.php.j2 dest={{ piwik.locations.dest }}/config/fragments/ldap_config.ini.php owner={{ apache.user }} group={{ apache.group }} mode=0640
   tags:
+    - ldap
     - piwik

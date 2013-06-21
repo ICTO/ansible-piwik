@@ -15,11 +15,11 @@ Everything you should know about Ansible is documented on the [Ansible](http://a
 
 #### Debian wheezy
 
-Playbook tested on *Debian-7.0-rc1-amd64*, probably works on other Debian versions too. Heavily depends on *apt*, sorry CentOS users...
+Playbook tested on *Debian-7.1.0*.
 
-#### Ansible >= 1.0
+#### Ansible >= 1.2
 
-Any Ansible version >= 1.0 should work. If not, please use the issue tracker to report any bugs.
+Any Ansible version >= 1.2 should work. If not, please use the issue tracker to report any bugs.
 
 ## Usage
 
@@ -28,6 +28,12 @@ Any Ansible version >= 1.0 should work. If not, please use the issue tracker to 
 ```bash
 $ git clone git@github.ugent.be:Onderwijstechnologie/ansible-piwik.git
 ```
+### Custom settings
+
+Copy the *defaults.yml* file to *custom.yml* if you wish to modify the default settings.
+
+It's possible to add distribution specific adjustments. See *Debian_apache.yml* and *Debian_dependencies.yml*.
+
 
 ### Create an Ansible inventory file
 
@@ -65,32 +71,30 @@ with
 
 ```yaml
 ---
-mysql:
-  admin_user: root
-  admin_password: NEW
-  host: 127.0.0.1
-
-piwik_settings:
-  contact: 'your@email.com'
-  trustedhost: 'ip running piwik'
-  superuser: 'admin'
-  password: 'md5sum of password'
-  salt: '991c3720d8762830ddeeea1201aaa22a'
-  ip_range: 'All'
-
-piwik_sites:
-  - name: 'example1'
-    url: 'www.example1.com'
-  - name: 'example2'
-    url: 'www.example2.com'
-
-ldap_settings:
-  server: 'ldaps://ldapserver'
-  basedn: 'base_dn'
-  user: 'user'
-  pass: 'pass'
-  filter: '(objectClass=person)'
+settings:
+  mysql:
+    host: 127.0.0.1
+    admin_user: root
+    admin_pass: NEW
+    piwik_user: piwik
+    piwik_pass: piwik
+    piwik_db: piwik
+  piwik:
+    contact: 'your@email.com'
+    trustedhost: 'ip running piwik'
+    superuser: 'admin'
+    password: 'md5sum of password'
+    salt: '991c3720d8762830ddeeea1201aaa22a'
+    ip_range: 'All'
+  ldap:
+    server: 'ldaps://ldapserver'
+    basedn: 'base_dn'
+    user: 'user'
+    pass: 'pass'
+    filter: '(objectClass=person)'
 ```
+
+If you omit the ldap settings, the playbook skips the LDAP plugin installation.
 
 ### Run the playbook
 
@@ -103,41 +107,51 @@ $ ansible-playbook -k -i ansible.host ansible-piwik/setup.yml --extra-vars="user
 ### Example output
 
 ```
-SSH password: 
+SSH password:
 
-PLAY [Piwik playbook] ********************* 
+PLAY [Piwik playbook] *********************************************************
 
-GATHERING FACTS ********************* 
+GATHERING FACTS ***************************************************************
 ok: [127.0.0.1]
+127.0.0.1: not importing file: /home/tberton/VagrantBoxes/vagrant-piwik/ansible-piwik/vars/custom.yml
+127.0.0.1: importing /home/tberton/VagrantBoxes/vagrant-piwik/ansible-piwik/vars/Debian_dependencies.yml
+127.0.0.1: importing /home/tberton/VagrantBoxes/vagrant-piwik/ansible-piwik/vars/Debian_apache.yml
 
-TASK: [Fail if no MySQL configuration] ********************* 
+TASK: [Fail if no MySQL configuration] ****************************************
 skipping: [127.0.0.1]
 
-TASK: [Fail if no sites defined] ********************* 
+TASK: [Fail if no Piwik configuration] ****************************************
 skipping: [127.0.0.1]
 
-TASK: [Install MySQL server] ********************* 
+TASK: [Fail if no sites defined] **********************************************
+skipping: [127.0.0.1]
+
+TASK: [Install MySQL dependencies] ********************************************
+changed: [127.0.0.1] => (item=mysql-server)
+changed: [127.0.0.1] => (item=python-mysqldb)
+
+TASK: [Check if empty MySQL admin password] ***********************************
 changed: [127.0.0.1]
 
-TASK: [Change MySQL root password] ********************* 
+TASK: [Change MySQL root password] ********************************************
 changed: [127.0.0.1]
 
-TASK: [Install MySQLdb python package] ********************* 
+TASK: [Manage Piwik db] *******************************************************
 changed: [127.0.0.1]
 
-TASK: [Manage Piwik db] ********************* 
+TASK: [Manage Piwik db-user] **************************************************
 changed: [127.0.0.1]
 
-TASK: [Manage Piwik db-user] ********************* 
+TASK: [Check if Piwik db is empty] ********************************************
 changed: [127.0.0.1]
 
-TASK: [Transfer SQL file] ********************* 
+TASK: [Transfer SQL file] *****************************************************
 changed: [127.0.0.1]
 
-TASK: [Execute Piwik SQL files] ********************* 
+TASK: [Execute Piwik SQL files] ***********************************************
 changed: [127.0.0.1]
 
-TASK: [Install Piwik dependencies] ********************* 
+TASK: [Install PHP dependencies] **********************************************
 changed: [127.0.0.1] => (item=apache2)
 changed: [127.0.0.1] => (item=php5)
 ok: [127.0.0.1] => (item=libapache2-mod-php5)
@@ -145,78 +159,70 @@ changed: [127.0.0.1] => (item=php5-mysql)
 changed: [127.0.0.1] => (item=php5-gd)
 changed: [127.0.0.1] => (item=php5-geoip)
 changed: [127.0.0.1] => (item=php5-ldap)
+
+TASK: [Install general dependencies] ******************************************
 ok: [127.0.0.1] => (item=unzip)
 
-TASK: [Fetch latest Piwik release] ********************* 
+TASK: [Fetch latest Piwik release] ********************************************
 changed: [127.0.0.1]
 
-TASK: [Create Piwik destination folder] ********************* 
+TASK: [Create Piwik destination folder] ***************************************
 changed: [127.0.0.1]
 
-TASK: [Extract Piwik zipfile] ********************* 
+TASK: [Extract Piwik zipfile] *************************************************
 changed: [127.0.0.1]
 
-TASK: [Create Piwik temp folders] ********************* 
+TASK: [Create Piwik temp folders] *********************************************
 changed: [127.0.0.1] => (item=tmp)
 changed: [127.0.0.1] => (item=tmp/templates_c)
 changed: [127.0.0.1] => (item=tmp/assets)
 changed: [127.0.0.1] => (item=tmp/tcpdf)
 changed: [127.0.0.1] => (item=config)
 
-TASK: [Create Piwik fragments folder] ********************* 
+TASK: [Create Piwik fragments folder] *****************************************
 changed: [127.0.0.1]
 
-TASK: [Add Piwik config] ********************* 
+TASK: [Add Piwik config] ******************************************************
 changed: [127.0.0.1]
 
-TASK: [Add Piwik apache Alias] ********************* 
+TASK: [Add Piwik Apache Alias] ************************************************
 changed: [127.0.0.1]
 
-TASK: [Restart Apache] ********************* 
+TASK: [Restart Apache] ********************************************************
 changed: [127.0.0.1]
 
-TASK: [Fetch latest GeoIP database] ********************* 
+TASK: [Fetch latest GeoIP database] *******************************************
 changed: [127.0.0.1]
 
-TASK: [Extract GeoIP database] ********************* 
+TASK: [Extract GeoIP database] ************************************************
 changed: [127.0.0.1]
 
-TASK: [Rename GeoIP database] ********************* 
+TASK: [Fetch LDAP plugin] *****************************************************
 changed: [127.0.0.1]
 
-TASK: [Fetch LDAP plugin] ********************* 
+TASK: [Extract LDAP plugin] ***************************************************
 changed: [127.0.0.1]
 
-TASK: [Extract LDAP plugin] ********************* 
+TASK: [Fix LDAP plugin dir permissions] ***************************************
 changed: [127.0.0.1]
 
-TASK: [Fix LDAP plugin dir permissions] ********************* 
+TASK: [Enable LDAP plugin] ****************************************************
 changed: [127.0.0.1]
 
-TASK: [Enable LDAP plugin] ********************* 
+TASK: [Activate LDAP plugin] **************************************************
 changed: [127.0.0.1]
 
-TASK: [Activate LDAP plugin] ********************* 
+TASK: [Add Piwik ldap config] *************************************************
 changed: [127.0.0.1]
 
-TASK: [Add Piwik ldap config] ********************* 
+TASK: [Create Piwik config] ***************************************************
 changed: [127.0.0.1]
 
-TASK: [Create Piwik config] ********************* 
+TASK: [Generate API auth token] ***********************************************
 changed: [127.0.0.1]
 
-TASK: [Generate API auth token] ********************* 
-changed: [127.0.0.1]
-
-TASK: [Check if site is present] ********************* 
-failed: [127.0.0.1] => (item={'url': '127.0.0.1', 'name': 'localhost'}) => {"changed": true, "cmd": "bash -c \"[ `curl 'http://127.0.0.1/piwik/index.php?module=API&method=SitesManager.getSitesIdFromSiteUrl&url=http://127.0.0.1&format=JSON&token_auth=c0e024d9200b5705bc4804722636378a'` == '[]' ] && curl 'http://127.0.0.1/piwik/index.php?module=API&method=SitesManager.addSite&siteName=localhost&urls=127.0.0.1&format=json&token_auth=c0e024d9200b5705bc4804722636378a'\" ", "delta": "0:00:05.291130", "end": "2013-05-16 08:49:52.592105", "item": {"name": "localhost", "url": "127.0.0.1"}, "rc": 1, "start": "2013-05-16 08:49:47.300975"}
-stderr:   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100    16  100    16    0     0      3      0  0:00:05  0:00:05 --:--:--     3
-...ignoring
-
-PLAY RECAP ********************* 
-127.0.0.1                   : ok=29   changed=28   unreachable=0    failed=0    
+PLAY RECAP ********************************************************************
+127.0.0.1               : ok=29   changed=27   unreachable=0    failed=0
 ```
 
 ## Docs and contact
