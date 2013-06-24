@@ -1,36 +1,28 @@
 ---
-# Execute some tests first
-- include: tasks/checks.yml
+# Check if necessary configuration settings are present
+- include: checks.yml
 
 # Manage Piwik MySQL db
-- include: tasks/db.yml
+- include: db.yml
 
 # Install Piwik
-- include: tasks/piwik.yml
+- include: piwik.yml
 
 # Install GeoIP database file
-- include: tasks/geoip.yml
+- include: geoip.yml
 
 # Install LDAP plugin
-- include: tasks/ldap.yml
+- include: ldap.yml
+  when: settings.ldap is defined
 
 # Create Piwik config
 - name: "Create Piwik config"
-  action: assemble src=${piwik.dest_dir}/config/fragments dest=${piwik.dest_dir}/config/config.ini.php owner=${piwik.www_user} group=${piwik.www_group} mode=0640
+  action: assemble src={{ piwik.locations.dest }}/config/fragments dest={{ piwik.locations.dest }}/config/config.ini.php owner={{ apache.user }} group={{ apache.group }} mode=0640
   tags:
     - piwik
 
 # Generate admin API token to use in API requests later on
 - name: "Generate API auth token"
-  action: shell echo -n ${piwik_settings.superuser}${piwik_settings.password} | md5sum | cut -f 1 -d ' '
-  register: auth_token
-  tags:
-    - piwik
-
-# Add sites
-- name: "Check if site is present"
-  action: shell bash -c "[ `curl 'http://127.0.0.1/piwik/index.php?module=API&method=SitesManager.getSitesIdFromSiteUrl&url=http://${item.url}&format=JSON&token_auth=${auth_token.stdout}'` == '[]' ] && curl 'http://127.0.0.1/piwik/index.php?module=API&method=SitesManager.addSite&siteName=${item.name}&urls=${item.url}&format=json&token_auth=${auth_token.stdout}'"
-  ignore_errors: yes
-  with_items: ${piwik.sites}
+  action: shell echo -n {{ settings.piwik.superuser }}{{ settings.piwik.password }} | md5sum | cut -f 1 -d ' '
   tags:
     - piwik

@@ -1,53 +1,60 @@
 ---
 # Install Piwik dependencies
-- name: "Install Piwik dependencies"
-  action: ${ansible_pkg_mgr} pkg=${item} state=installed update-cache=yes
-  with_items: ${piwik.dependencies}
+- name: "Install PHP dependencies"
+  action: ${ansible_pkg_mgr} pkg={{ item }} state=installed update-cache=yes
+  with_items: ${dependencies.php}
+  tags:
+    - piwik
+
+# Install general dependencies
+- name: "Install general dependencies"
+  action: ${ansible_pkg_mgr} pkg={{ item }} state=installed update-cache=yes
+  with_items: ${dependencies.general}
   tags:
     - piwik
 
 # Fetch latest release
 - name: "Fetch latest Piwik release"
-  action: get_url url=${piwik.zip} dest=${piwik.tmp_dir} mode=0440 owner=root group=root
+  action: get_url url={{ piwik.url }}/{{ piwik.file }} dest={{ piwik.locations.tmp }} mode=0440 owner=root group=root
   register: piwik_release
   tags:
     - piwik
 
 # Create Piwik destination folder
 - name: "Create Piwik destination folder"
-  action: file path=${piwik.install_dir} owner=${piwik.www_user} group=${piwik.www_group} mode=0755 state=directory
+  action: file path={{ piwik.locations.install }} owner={{ apache.user }} group={{ apache.group }} mode=0755 state=directory
   tags:
     - piwik
 
 # Extract package
 - name: "Extract Piwik zipfile"
-  action: shell unzip -u ${piwik.tmp_dir}/latest.zip -d ${piwik.install_dir}
-  when_changed: ${piwik_release}
+  action: shell unzip -u {{ piwik.locations.tmp }}/{{ piwik.file }} -d {{ piwik.locations.install }}
+  when: piwik_release.changed
   tags:
     - piwik
 
 # Create Piwik temp folders
 - name: "Create Piwik temp folders"
-  action: file path=${piwik.dest_dir}/${item} owner=${piwik.www_user} group=${piwik.www_group} mode=0755 state=directory
-  with_items: ${piwik.dirs}
+  action: file path={{ piwik.locations.dest }}/{{ item }} owner={{ apache.user }} group={{ apache.group }} mode=0755 state=directory
+  with_items: ${piwik.web_writable_dirs}
   tags:
     - piwik
 
 # Create Piwik fragments folder
 - name: "Create Piwik fragments folder"
-  action: file path=${piwik.dest_dir}/config/fragments owner=${piwik.www_user} group=${piwik.www_group} mode=0750 state=directory
+  action: file path={{ piwik.locations.dest }}/config/fragments owner={{ apache.user }} group={{ apache.group }} mode=0750 state=directory
   tags:
     - piwik
 
 # Add Piwik config
 - name: "Add Piwik config"
-  action: template src=templates/config.ini.php.j2 dest=${piwik.dest_dir}/config/fragments/base_config.ini.php owner=${piwik.www_user} group=${piwik.www_group} mode=0640
+  action: template src=templates/config.ini.php.j2 dest={{ piwik.locations.dest }}/config/fragments/base_config.ini.php owner={{ apache.user }} group={{ apache.group }} mode=0640
   tags:
     - piwik
 
 # Add Piwik Apache alias
-- name: "Add Piwik apache Alias"
-  action: template src=templates/piwik.j2 dest=/etc/apache2/conf.d/piwik owner=${piwik.www_user} group=${piwik.www_group} mode=0640
+- name: "Add Piwik Apache Alias"
+  action: template src=templates/piwik.j2 dest=/etc/apache2/conf.d/piwik owner={{ apache.user }} group={{ apache.group }} mode=0640
   register: apache_conf
   tags:
     - piwik
@@ -55,6 +62,6 @@
 # Restart Apache if config changed
 - name: "Restart Apache"
   action: service name=apache2 state=restarted
-  when_changed: ${apache_conf}
+  when: apache_conf.changed
   tags:
     - piwik

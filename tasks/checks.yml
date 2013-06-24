@@ -1,14 +1,24 @@
 ---
+# Verify MySQL settings present
 - name: "Fail if no MySQL configuration"
   fail: msg="MySQL settings not defined"
-  when_unset: ${mysql}
+  when: settings.mysql is not defined
   tags:
     - piwik
     - checks
 
+# Verify Piwik settings present
+- name: "Fail if no Piwik configuration"
+  fail: msg="Piwik settings not defined"
+  when: settings.piwik is not defined
+  tags:
+    - piwik
+    - checks
+
+# Verify sites present
 - name: "Fail if no sites defined"
   fail: msg="Define at least 1 site"
-  when_unset: ${piwik.sites}
+  when: piwik_sites is not defined
   tags:
     - piwik
     - checks
