@@ -10,19 +10,3 @@
 
 # Install GeoIP database file
 - include: geoip.yml
-
-# Install LDAP plugin
-- include: ldap.yml
-  when: settings.ldap is defined
-
-# Create Piwik config
-- name: "Create Piwik config"
-  action: assemble src={{ piwik.locations.dest }}/config/fragments dest={{ piwik.locations.dest }}/config/config.ini.php owner={{ apache.user }} group={{ apache.group }} mode=0640
-  tags:
-    - piwik
-
-# Generate admin API token to use in API requests later on
-- name: "Generate API auth token"
-  action: shell echo -n {{ settings.piwik.superuser }}{{ settings.piwik.password }} | md5sum | cut -f 1 -d ' '
-  tags:
-    - piwik

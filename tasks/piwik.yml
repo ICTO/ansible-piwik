@@ -40,18 +40,6 @@
   tags:
     - piwik
 
-# Create Piwik fragments folder
-- name: "Create Piwik fragments folder"
-  action: file path={{ piwik.locations.dest }}/config/fragments owner={{ apache.user }} group={{ apache.group }} mode=0750 state=directory
-  tags:
-    - piwik
-
-# Add Piwik config
-- name: "Add Piwik config"
-  action: template src=templates/config.ini.php.j2 dest={{ piwik.locations.dest }}/config/fragments/base_config.ini.php owner={{ apache.user }} group={{ apache.group }} mode=0640
-  tags:
-    - piwik
-
 # Add Piwik Apache alias
 - name: "Add Piwik Apache Alias"
   action: template src=templates/piwik.j2 dest=/etc/apache2/conf.d/piwik owner={{ apache.user }} group={{ apache.group }} mode=0640
