@@ -1,55 +1,35 @@
 ---
-# Install Piwik dependencies
-- name: "Install PHP dependencies"
-  action: ${ansible_pkg_mgr} pkg={{ item }} state=installed update-cache=yes
-  with_items: ${dependencies.php}
-  tags:
-    - piwik
+- include: dependencies_deb.yml
+  when: ansible_distribution in [ 'Debian', 'Ubuntu' ]
 
-# Install general dependencies
-- name: "Install general dependencies"
-  action: ${ansible_pkg_mgr} pkg={{ item }} state=installed update-cache=yes
-  with_items: ${dependencies.general}
-  tags:
-    - piwik
+- include: db.yml
 
 # Fetch latest release
 - name: "Fetch latest Piwik release"
-  action: get_url url={{ piwik.url }}/{{ piwik.file }} dest={{ piwik.locations.tmp }} mode=0440 owner=root group=root
-  register: piwik_release
-  tags:
-    - piwik
+  sudo: yes
+  action: get_url url={{ piwik.settings.url }}/{{ piwik.settings.file }} dest={{ piwik.settings.locations.tmp }} mode=0440 owner=root group=root
 
 # Create Piwik destination folder
 - name: "Create Piwik destination folder"
-  action: file path={{ piwik.locations.install }} owner={{ apache.user }} group={{ apache.group }} mode=0755 state=directory
-  tags:
-    - piwik
+  sudo: yes
+  action: file path={{ piwik.settings.locations.install }} owner={{ piwik.apache.user }} group={{ piwik.apache.group }} mode=0755 state=directory
 
 # Extract package
 - name: "Extract Piwik zipfile"
-  action: shell unzip -u {{ piwik.locations.tmp }}/{{ piwik.file }} -d {{ piwik.locations.install }}
-  when: piwik_release.changed
-  tags:
-    - piwik
+  sudo: yes
+  action: shell unzip -u {{ piwik.settings.locations.tmp }}/{{ piwik.settings.file }} -d {{ piwik.settings.locations.install }} creates={{ piwik.settings.locations.dest }}
 
 # Create Piwik temp folders
 - name: "Create Piwik temp folders"
-  action: file path={{ piwik.locations.dest }}/{{ item }} owner={{ apache.user }} group={{ apache.group }} mode=0755 state=directory
-  with_items: ${piwik.web_writable_dirs}
-  tags:
-    - piwik
+  sudo: yes
+  action: file path={{ piwik.settings.locations.dest }}/{{ item }} owner={{ piwik.apache.user }} group={{ piwik.apache.group }} mode=0755 state=directory
+  with_items: piwik.settings.web_writable_dirs
 
 # Add Piwik Apache alias
 - name: "Add Piwik Apache Alias"
-  action: template src=templates/piwik.j2 dest=/etc/apache2/conf.d/piwik owner={{ apache.user }} group={{ apache.group }} mode=0640
-  register: apache_conf
-  tags:
-    - piwik
+  sudo: yes
+  action: template src=piwik.j2 dest=/etc/apache2/conf.d/piwik owner={{ piwik.apache.user }} group={{ piwik.apache.group }} mode=0640
+  notify:
+    - Restart Apache
 
-# Restart Apache if config changed
-- name: "Restart Apache"
-  action: service name=apache2 state=restarted
-  when: apache_conf.changed
-  tags:
-    - piwik
+- include: geoip.yml

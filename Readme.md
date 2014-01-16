@@ -2,24 +2,22 @@
 
 ## Description
 
-*ansible-piwik* is an [Ansible](http://ansible.cc) playbook.
-The playbook contains tasks to install Piwik (with MySQL backend) running on Apache.
+*ansible-piwik* is an [Ansible](http://ansible.cc) role.
+The playbook contains tasks to provide a Piwik installation (with MySQL backend) running on Apache.
 
-## Requirements
+## Provides
 
-### Ansible
+1. MySQL
+2. Apache
+3. PHP
+4. Latest Piwik codebase
+5. GeoIP database
 
-Everything you should know about Ansible is documented on the [Ansible](http://ansible.cc/docs/gettingstarted.html) site...
+## Requires
 
-### Supported platforms
-
-#### Debian wheezy
-
-Playbook tested on *Debian-7.1.0*.
-
-#### Ansible >= 1.2
-
-Any Ansible version >= 1.2 should work. If not, please use the issue tracker to report any bugs.
+1. Ansible 1.4 or higher
+2. Debian 7.3 (other deb-based distros should work too)
+3. Vagrant (optional)
 
 ## Usage
 
@@ -28,11 +26,8 @@ Any Ansible version >= 1.2 should work. If not, please use the issue tracker to 
 ```bash
 $ git clone git@github.ugent.be:Onderwijstechnologie/ansible-piwik.git
 ```
+
 ### Custom settings
-
-Copy the *defaults.yml* file to *custom.yml* if you wish to modify the default settings.
-
-It's possible to add distribution specific adjustments. See *Debian_apache.yml* and *Debian_dependencies.yml*.
 
 
 ### Create an Ansible inventory file
@@ -50,11 +45,19 @@ with
 127.0.0.1 ansible_ssh_port=2222
 ```
 
-The *ansible-piwik* playbook is only executed for the host/group *piwik*.
+### Create the playbook file
 
-### Create group specific variables
+```
+---
+- name: Piwik
+  hosts: piwik
+  roles:
+    - ansible-piwik
+```
 
-Create a *group_vars* directory where the *ansible.host* file is located.
+### Create host or group specific variables
+
+Create a *host_vars* or *group_vars* directory where the *ansible.host* file is located.
 
 ```bash
 $ mkdir group_vars
@@ -71,7 +74,7 @@ with
 
 ```yaml
 ---
-settings:
+piwik:
   mysql:
     host: 127.0.0.1
     admin_user: root
@@ -79,22 +82,19 @@ settings:
     piwik_user: piwik
     piwik_pass: piwik
     piwik_db: piwik
-  piwik:
-    contact: 'your@email.com'
-    trustedhost: 'ip running piwik'
-    superuser: 'admin'
-    password: 'md5sum of password'
-    salt: '991c3720d8762830ddeeea1201aaa22a'
-    ip_range: 'All'
-  ldap:
-    server: 'ldaps://ldapserver'
-    basedn: 'base_dn'
-    user: 'user'
-    pass: 'pass'
-    filter: '(objectClass=person)'
+
+  settings:
+    ip_range: '192.168.33.1'
 ```
 
-If you omit the ldap settings, the playbook skips the LDAP plugin installation.
+If empty the role will load default variables from *defaults/main.yml*
+
+Make sure to use the Ansible setting *hash_behaviour=merge* in *ansible.cfg*, i.e.:
+
+```
+[defaults]
+hash_behaviour=merge
+```
 
 ### Run the playbook
 
@@ -107,51 +107,18 @@ $ ansible-playbook -k -i ansible.host ansible-piwik/setup.yml --extra-vars="user
 ### Example output
 
 ```
-SSH password:
+SSH password: 
 
-PLAY [Piwik playbook] *********************************************************
+PLAY [Piwik] ****************************************************************** 
 
-GATHERING FACTS ***************************************************************
+GATHERING FACTS *************************************************************** 
 ok: [127.0.0.1]
-127.0.0.1: not importing file: /home/tberton/VagrantBoxes/vagrant-piwik/ansible-piwik/vars/custom.yml
-127.0.0.1: importing /home/tberton/VagrantBoxes/vagrant-piwik/ansible-piwik/vars/Debian_dependencies.yml
-127.0.0.1: importing /home/tberton/VagrantBoxes/vagrant-piwik/ansible-piwik/vars/Debian_apache.yml
 
-TASK: [Fail if no MySQL configuration] ****************************************
-skipping: [127.0.0.1]
-
-TASK: [Fail if no Piwik configuration] ****************************************
-skipping: [127.0.0.1]
-
-TASK: [Fail if no sites defined] **********************************************
-skipping: [127.0.0.1]
-
-TASK: [Install MySQL dependencies] ********************************************
+TASK: [ansible-piwik | Install MySQL dependencies] **************************** 
 changed: [127.0.0.1] => (item=mysql-server)
 changed: [127.0.0.1] => (item=python-mysqldb)
 
-TASK: [Check if empty MySQL admin password] ***********************************
-changed: [127.0.0.1]
-
-TASK: [Change MySQL root password] ********************************************
-changed: [127.0.0.1]
-
-TASK: [Manage Piwik db] *******************************************************
-changed: [127.0.0.1]
-
-TASK: [Manage Piwik db-user] **************************************************
-changed: [127.0.0.1]
-
-TASK: [Check if Piwik db is empty] ********************************************
-changed: [127.0.0.1]
-
-TASK: [Transfer SQL file] *****************************************************
-changed: [127.0.0.1]
-
-TASK: [Execute Piwik SQL files] ***********************************************
-changed: [127.0.0.1]
-
-TASK: [Install PHP dependencies] **********************************************
+TASK: [ansible-piwik | Install PHP dependencies] ****************************** 
 changed: [127.0.0.1] => (item=apache2)
 changed: [127.0.0.1] => (item=php5)
 ok: [127.0.0.1] => (item=libapache2-mod-php5)
@@ -160,73 +127,46 @@ changed: [127.0.0.1] => (item=php5-gd)
 changed: [127.0.0.1] => (item=php5-geoip)
 changed: [127.0.0.1] => (item=php5-ldap)
 
-TASK: [Install general dependencies] ******************************************
-ok: [127.0.0.1] => (item=unzip)
+TASK: [ansible-piwik | Install general dependencies] ************************** 
+changed: [127.0.0.1] => (item=unzip)
 
-TASK: [Fetch latest Piwik release] ********************************************
+TASK: [ansible-piwik | Check if empty MySQL admin password] ******************* 
 changed: [127.0.0.1]
 
-TASK: [Create Piwik destination folder] ***************************************
+TASK: [ansible-piwik | Change MySQL root password] **************************** 
 changed: [127.0.0.1]
 
-TASK: [Extract Piwik zipfile] *************************************************
+TASK: [ansible-piwik | Manage Piwik db] *************************************** 
 changed: [127.0.0.1]
 
-TASK: [Create Piwik temp folders] *********************************************
+TASK: [ansible-piwik | Manage Piwik db-user] ********************************** 
+changed: [127.0.0.1]
+
+TASK: [ansible-piwik | Fetch latest Piwik release] **************************** 
+changed: [127.0.0.1]
+
+TASK: [ansible-piwik | Create Piwik destination folder] *********************** 
+changed: [127.0.0.1]
+
+TASK: [ansible-piwik | Extract Piwik zipfile] ********************************* 
+changed: [127.0.0.1]
+
+TASK: [ansible-piwik | Create Piwik temp folders] ***************************** 
 changed: [127.0.0.1] => (item=tmp)
-changed: [127.0.0.1] => (item=tmp/templates_c)
-changed: [127.0.0.1] => (item=tmp/assets)
-changed: [127.0.0.1] => (item=tmp/tcpdf)
 changed: [127.0.0.1] => (item=config)
 
-TASK: [Create Piwik fragments folder] *****************************************
+TASK: [ansible-piwik | Add Piwik Apache Alias] ******************************** 
 changed: [127.0.0.1]
 
-TASK: [Add Piwik config] ******************************************************
+TASK: [ansible-piwik | Fetch latest GeoIP database] *************************** 
 changed: [127.0.0.1]
 
-TASK: [Add Piwik Apache Alias] ************************************************
+TASK: [ansible-piwik | Extract GeoIP database] ******************************** 
 changed: [127.0.0.1]
 
-TASK: [Restart Apache] ********************************************************
+NOTIFIED: [ansible-piwik | Restart Apache] ************************************ 
 changed: [127.0.0.1]
 
-TASK: [Fetch latest GeoIP database] *******************************************
-changed: [127.0.0.1]
-
-TASK: [Extract GeoIP database] ************************************************
-changed: [127.0.0.1]
-
-TASK: [Fetch LDAP plugin] *****************************************************
-changed: [127.0.0.1]
-
-TASK: [Extract LDAP plugin] ***************************************************
-changed: [127.0.0.1]
-
-TASK: [Fix LDAP plugin dir permissions] ***************************************
-changed: [127.0.0.1]
-
-TASK: [Enable LDAP plugin] ****************************************************
-changed: [127.0.0.1]
-
-TASK: [Activate LDAP plugin] **************************************************
-changed: [127.0.0.1]
-
-TASK: [Add Piwik ldap config] *************************************************
-changed: [127.0.0.1]
-
-TASK: [Create Piwik config] ***************************************************
-changed: [127.0.0.1]
-
-TASK: [Generate API auth token] ***********************************************
-changed: [127.0.0.1]
-
-PLAY RECAP ********************************************************************
-127.0.0.1               : ok=29   changed=27   unreachable=0    failed=0
+PLAY RECAP ******************************************************************** 
+127.0.0.1                  : ok=16   changed=15   unreachable=0    failed=0   
 ```
-
-## Docs and contact
-
-Read more on the Wiki pages about how this playbook works.
-
-http://icto.ugent.be

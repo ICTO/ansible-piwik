@@ -1,0 +1,16 @@
+---
+- name: "Restart Apache"
+  sudo: yes
+  action: service name={{ piwik.apache.service }} state=restarted
+
+- name: "Reload Apache"
+  sudo: yes
+  action: service name={{ piwik.apache.service }} state=reloaded
+
+- name: "Start Apache, if not running"
+  sudo: yes
+  action: service name={{ piwik.apache.service }} state=started
+
+- name: "Stop Apache, if running"
+  sudo: yes
+  action: service name={{ piwik.apache.service }} state=stopped

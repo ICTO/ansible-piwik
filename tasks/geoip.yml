@@ -1,16 +1,12 @@
 ---
 # Fetch latest release GeoIP database
 - name: "Fetch latest GeoIP database"
-  action: get_url url={{ geoip.url }}/{{ geoip.file }} dest={{ piwik.locations.dest }}/misc/ mode=0660 owner={{ apache.user }} group={{ apache.group }}
+  sudo: yes
+  action: get_url url={{ piwik.geoip.url }}/{{ piwik.geoip.file }} dest={{ piwik.settings.locations.dest }}/misc/ mode=0660 owner={{ piwik.apache.user }} group={{ piwik.apache.group }}
   register: geoip_db
-  tags:
-    - piwik
-    - geoip
 
 # Extract GeoIP database
 - name: "Extract GeoIP database"
-  action: shell gunzip -c {{ piwik.locations.dest }}/misc/{{ geoip.file }} > {{ piwik.locations.dest }}/misc/{{ geoip.dest }}
+  sudo: yes
+  action: shell gunzip -c {{ piwik.settings.locations.dest }}/misc/{{ piwik.geoip.file }} > {{ piwik.settings.locations.dest }}/misc/{{ piwik.geoip.dest }}
   when: geoip_db.changed
-  tags:
-    - piwik
-    - geoip
