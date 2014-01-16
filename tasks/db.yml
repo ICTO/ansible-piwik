@@ -1,4 +1,8 @@
 ---
+- name: "Start MySQL service"
+  sudo: yes
+  action: service name={{ piwik.mysql.service }} state=started enabled=yes
+
 - name: "Check if empty MySQL admin password"
   action: shell mysql -h {{ piwik.mysql.host }} -u {{ piwik.mysql.admin_user }} -e quit
   ignore_errors: True

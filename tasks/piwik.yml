@@ -2,6 +2,9 @@
 - include: dependencies_deb.yml
   when: ansible_distribution in [ 'Debian', 'Ubuntu' ]
 
+- include: dependencies_rpm.yml
+  when: ansible_distribution in [ 'CentOS', 'RedHat', 'Fedora' ]
+
 - include: db.yml
 
 # Fetch latest release
@@ -28,8 +31,12 @@
 # Add Piwik Apache alias
 - name: "Add Piwik Apache Alias"
   sudo: yes
-  action: template src=piwik.j2 dest=/etc/apache2/conf.d/piwik owner={{ piwik.apache.user }} group={{ piwik.apache.group }} mode=0640
+  action: template src=piwik.j2 dest=/etc/{{ piwik.apache.service }}/conf.d/piwik.conf owner={{ piwik.apache.user }} group={{ piwik.apache.group }} mode=0640
   notify:
     - Restart Apache
+
+- name: "Start and enable Apache"
+  sudo: yes
+  action: service name={{ piwik.apache.service }} state=started enabled=yes
 
 - include: geoip.yml

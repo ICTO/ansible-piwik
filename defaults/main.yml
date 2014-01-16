@@ -8,6 +8,7 @@ piwik:
     piwik_user: piwik
     piwik_pass: piwik
     piwik_db: piwik
+    service: 'mysql'
   settings:
     # Latest Piwik build
     url: 'http://builds.piwik.org'
@@ -42,3 +43,18 @@ piwik:
       mysql:
         - 'mysql-server'
         - 'python-mysqldb' # Install MySQLdb Python package, mandatory to manage MySQL with ansible
+    rpm:
+      php:
+        - 'httpd'
+        - 'php'
+        - 'php-common'
+        - 'php-mysqlnd'
+        - 'php-gd'
+        - 'php-pecl-geoip'
+        - 'php-ldap'
+        - 'php-mbstring'
+      general:
+        - 'unzip'
+      mysql:
+        - 'community-mysql-server'
+        - 'MySQL-python' # Install MySQLdb Python package, mandatory to manage MySQL with ansible

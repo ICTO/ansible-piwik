@@ -1,0 +1,18 @@
+---
+# Install MySQL dependencies
+- name: "Install MySQL dependencies"
+  sudo: yes
+  action: ${ansible_pkg_mgr} name={{ item }} state=installed
+  with_items: piwik.dependencies.rpm.mysql
+
+# Install Piwik dependencies
+- name: "Install PHP dependencies"
+  sudo: yes
+  action: ${ansible_pkg_mgr} name={{ item }} state=installed
+  with_items: piwik.dependencies.rpm.php
+
+# Install general dependencies
+- name: "Install general dependencies"
+  sudo: yes
+  action: ${ansible_pkg_mgr} name={{ item }} state=installed
+  with_items: piwik.dependencies.rpm.general

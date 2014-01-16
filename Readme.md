@@ -19,6 +19,21 @@ The playbook contains tasks to provide a Piwik installation (with MySQL backend)
 2. Debian 7.3 (other deb-based distros should work too)
 3. Vagrant (optional)
 
+Note: Tested on Fedora 20 but requires some custom host_vars see below:
+
+```
+---
+piwik:
+  mysql:
+    service: 'mysqld'
+  apache:
+    user: 'apache'
+    group: 'apache'
+    service: 'httpd'
+```
+
+(If necessary adjust firewall rules to allow http...)
+
 ## Usage
 
 ### Get the code
