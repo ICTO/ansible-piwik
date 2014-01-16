@@ -26,7 +26,7 @@ Any Ansible version >= 1.2 should work. If not, please use the issue tracker to 
 ### Get the code
 
 ```bash
-$ git clone git@github.ugent.be:Onderwijstechnologie/ansible-piwik.git
+$ git clone git@github.com:ICTO/ansible-piwik.git
 ```
 ### Custom settings
 
