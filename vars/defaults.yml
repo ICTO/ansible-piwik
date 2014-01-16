@@ -13,15 +13,15 @@ piwik:
   mysql: ${settings.mysql}
   locations:
     tmp: '/tmp'
-    install: '/opt/piwik'
-    dest: '/opt/piwik/piwik'
-    config: '/opt/piwik/piwik/config/config.ini.php'
-    plugins: '/opt/piwik/piwik/plugins'
+    install: '/opt/'
+    dest: '/opt/piwik'
+    config: '/opt/piwik/config/config.ini.php'
+    plugins: '/opt/piwik/plugins'
   web_writable_dirs:
     - 'tmp'
-    - 'tmp/templates_c'
-    - 'tmp/assets'
-    - 'tmp/tcpdf'
+    # - 'tmp/templates_c'
+    # - 'tmp/assets'
+    # - 'tmp/tcpdf'
     - 'config'
   # Piwik application settings retrieved from host_vars or group_vars
   settings: ${settings.piwik}
@@ -30,9 +30,3 @@ geoip:
   url: 'http://geolite.maxmind.com/download/geoip/database'
   file: 'GeoLiteCity.dat.gz'
   dest: 'GeoIPCity.dat'
-
-ldap:
-  url: 'http://piwik-ldap.googlecode.com/files'
-  file: 'LoginLdap-1.3.1.zip'
-  dest: 'LoginLdap.zip'
-  name: 'LoginLdap'
