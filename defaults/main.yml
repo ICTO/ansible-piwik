@@ -1,0 +1,44 @@
+---
+# Default dependency list, based on Debian:
+piwik:
+  mysql:
+    host: 127.0.0.1
+    admin_user: root
+    admin_pass: root
+    piwik_user: piwik
+    piwik_pass: piwik
+    piwik_db: piwik
+  settings:
+    # Latest Piwik build
+    url: 'http://builds.piwik.org'
+    file: 'latest.zip'
+    locations:
+      tmp: '/tmp'
+      install: '/opt/'
+      dest: '/opt/piwik'
+    web_writable_dirs:
+      - 'tmp'
+      - 'config'
+  apache:
+    user: 'www-data'
+    group: 'www-data'
+    service: 'apache2'
+  geoip: 
+    url: 'http://geolite.maxmind.com/download/geoip/database'
+    file: 'GeoLiteCity.dat.gz'
+    dest: 'GeoIPCity.dat'
+  dependencies:
+    deb:
+      php:
+        - 'apache2'
+        - 'php5'
+        - 'libapache2-mod-php5'
+        - 'php5-mysql'
+        - 'php5-gd'
+        - 'php5-geoip'
+        - 'php5-ldap'
+      general:
+        - 'unzip'
+      mysql:
+        - 'mysql-server'
+        - 'python-mysqldb' # Install MySQLdb Python package, mandatory to manage MySQL with ansible

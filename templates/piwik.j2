@@ -1,13 +1,16 @@
 # Piwik alias
 <IfModule mod_alias.c>
-    Alias /piwik {{ piwik.locations.dest }}
+    Alias /piwik {{ piwik.settings.locations.dest }}
 </IfModule>
 
-<Directory {{ piwik.locations.dest }}>
+<Directory {{ piwik.settings.locations.dest }}>
 	Order Deny,Allow 
 	Deny from All 
-	Allow from {{ settings.piwik.ip_range }}
- 
+  {% if piwik.settings.ip_range is defined %}
+	Allow from {{ piwik.settings.ip_range }}
+  {% else %}
+  Allow from All
+  {% endif %}
 	<Files "piwik.php"> 
 	     Order Deny,Allow 
 	     Allow from All 

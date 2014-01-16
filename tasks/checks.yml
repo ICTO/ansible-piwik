@@ -1,8 +1,0 @@
----
-# Verify MySQL settings present
-- name: "Fail if no MySQL configuration"
-  fail: msg="MySQL settings not defined"
-  when: settings.mysql is not defined
-  tags:
-    - piwik
-    - checks

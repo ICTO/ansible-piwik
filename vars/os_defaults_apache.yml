@@ -1,6 +1,0 @@
----
-# Apache configuration
-apache:
-  user: 'www-data'
-  group: 'www-data'
-  service: 'apache2'
