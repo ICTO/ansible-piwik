@@ -116,7 +116,7 @@ hash_behaviour=merge
 Use *ansible.host* as inventory. Run the playbook only for the remote host *piwik*. Use *vagrant* as the SSH user to connect to the remote host. *-k* enables the SSH password prompt.
 
 ```bash
-$ ansible-playbook -k -i ansible.host ansible-piwik/setup.yml --extra-vars="user=vagrant"
+$ ansible-playbook -k -i ansible.host piwik.yml -u vagrant
 ```
 
 ### Example output
