@@ -2,17 +2,20 @@
 # Install MySQL dependencies
 - name: "Install MySQL dependencies"
   sudo: yes
-  action: ${ansible_pkg_mgr} pkg={{ item }} state=installed update-cache=yes
-  with_items: piwik.dependencies.deb.mysql
+  action: "{{ansible_pkg_mgr}} pkg={{ item }} state=installed update-cache=yes"
+  with_items: 
+      - "{{ piwik.dependencies.deb.mysql }}"
 
 # Install Piwik dependencies
 - name: "Install PHP dependencies"
   sudo: yes
-  action: ${ansible_pkg_mgr} pkg={{ item }} state=installed update-cache=yes
-  with_items: piwik.dependencies.deb.php
+  action: "{{ansible_pkg_mgr}} pkg={{ item }} state=installed update-cache=yes"
+  with_items: 
+      - "{{ piwik.dependencies.deb.php }}"
 
 # Install general dependencies
 - name: "Install general dependencies"
   sudo: yes
-  action: ${ansible_pkg_mgr} pkg={{ item }} state=installed update-cache=yes
-  with_items: piwik.dependencies.deb.general
+  action: "{{ansible_pkg_mgr}} pkg={{ item }} state=installed update-cache=yes"
+  with_items: 
+      - "{{ piwik.dependencies.deb.general }}"
